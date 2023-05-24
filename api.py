@@ -5,7 +5,7 @@ import requests
 
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, StickerSendMessage
 from dotenv import dotenv_values
 
 config = dotenv_values('.env')
@@ -22,9 +22,9 @@ checklotto_obj = Checklotto()
 
 def CheckNumberLength(input_number:str):
     if len(input_number) < 6:
-        return f"Please enter all 6 numbers {6 - len(input_number)} more missing"
+        return f"กรุณากรอกตัวเลขให้ครับทั้ง 6 หลักค่ะ ยังขาดอีก {6 - len(input_number)} หลักนะคะ"
     elif len(input_number) > 6:
-        return f"Sorry your number's more than 6 unit"
+        return f"คุณกรอกตัวเลขเกินกรุณากรอกตัวเลขแค่ 6 หลักนะคะ"
     else:
         return True
         
@@ -32,15 +32,15 @@ def CheckNumberLength(input_number:str):
 async def root():
     return {'message': "Hi every body if you want to read document please go to /redoc"}
 
-@app.get('/latest/{input_number}')
-async def Checklatest(input_number:str):
+
+def CheckLatestLotto(input_number:str):
     isNumberTrue = CheckNumberLength(input_number)
     if isNumberTrue == True:
         return checklotto_obj.CheckIsWonlotto(input_number)
     else:
-        return {'status': 'Number length invalid', 'message': isNumberTrue}
+        return {'status': 'Number length invalid', 'message': isNumberTrue, 'sticker': {'package_id': "6325", 'sticker_id': "10979922"}}
 
-@app.post("/webhook")
+@app.post("/latest")
 async def webhook_handler(request: Request):
     body = await request.body()
     signature = request.headers["X-Line-Signature"]
@@ -52,8 +52,10 @@ async def webhook_handler(request: Request):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event: MessageEvent):
+    resultLotto = CheckLatestLotto(event.message.text)
     lineBotApi.reply_message(
         event.reply_token,
-        TextSendMessage(text="You said: " + event.message.text)
+        [TextSendMessage(text=resultLotto['message']), StickerSendMessage(package_id=resultLotto['sticker']['package_id'], sticker_id=resultLotto['sticker']['sticker_id'])]
     )
+    
 
