@@ -14,10 +14,6 @@ handler = WebhookHandler(config['SECRET'])
 
 app = FastAPI()
 
-class TestModel(BaseModel):
-    name:str
-    signature:str
-
 checklotto_obj = Checklotto()
 
 def CheckNumberLength(input_number:str):
@@ -31,7 +27,6 @@ def CheckNumberLength(input_number:str):
 @app.get('/')
 async def root():
     return {'message': "Hi every body if you want to read document please go to /redoc"}
-
 
 def CheckLatestLotto(input_number:str):
     isNumberTrue = CheckNumberLength(input_number)
@@ -57,5 +52,3 @@ def handle_message(event: MessageEvent):
         event.reply_token,
         [TextSendMessage(text=resultLotto['message']), StickerSendMessage(package_id=resultLotto['sticker']['package_id'], sticker_id=resultLotto['sticker']['sticker_id'])]
     )
-    
-
