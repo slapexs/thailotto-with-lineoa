@@ -1,3 +1,5 @@
-thai-lotto-venv/
 __pycache__
 .env
+
+# Env folder
+venv/
